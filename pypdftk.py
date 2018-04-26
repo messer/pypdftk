@@ -41,7 +41,7 @@ def check_output(*popenargs, **kwargs):
 def run_command(command, shell=False):
     ''' run a system command and yield output '''
     p = check_output(command, shell=shell)
-    return p.split('\n')
+    return p.decode('utf-8').split('\n')
 
 try:
     run_command([PDFTK_PATH])
@@ -92,7 +92,7 @@ def dump_data_fields(pdf_path):
 
     fields = [list(group) for k, group in itertools.groupby(field_data, lambda x: len(x) == 1) if not k]
 
-    return map(dict, fields)
+    return list(map(dict, fields))
 
 def concat(files, out_file=None):
     '''
@@ -142,7 +142,7 @@ def gen_xfdf(datas={}):
     ''' Generates a temp XFDF file suited for fill_form function, based on dict input data '''
     fields = []
     for key, value in datas.items():
-        fields.append(u"""        <field name="%s"><value>%s</value></field>""" % (key, value))
+        fields.append("""        <field name="%s"><value>%s</value></field>""" % (key, value))
     tpl = u"""<?xml version="1.0" encoding="UTF-8"?>
 <xfdf xmlns="http://ns.adobe.com/xfdf/" xml:space="preserve">
     <fields>
@@ -151,7 +151,7 @@ def gen_xfdf(datas={}):
 </xfdf>""" % "\n".join(fields)
     handle, out_file = tempfile.mkstemp()
     f = open(out_file, 'w')
-    f.write(tpl.encode('UTF-8'))
+    f.write(tpl)
     f.close()
     return out_file
 

@@ -21,7 +21,8 @@ SAMPLE_DATA2 = {
 }
 
 def read(path):
-    return "".join(open(path, 'r').readlines())
+    with open(path, 'r') as f:
+        return "".join(f.readlines())
 
 # json comparison... https://stackoverflow.com/a/25851972/174027
 def ordered(obj):
