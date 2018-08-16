@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import tempfile
 import itertools
+import lxml
 
 log = logging.getLogger(__name__)
 
@@ -137,21 +138,22 @@ def split(pdf_path, out_dir=None):
     out_files.sort()
     return [os.path.join(out_dir, filename) for filename in out_files]
 
-
 def gen_xfdf(datas={}):
-    ''' Generates a temp XFDF file suited for fill_form function, based on dict input data '''
-    fields = []
-    for key, value in datas.items():
-        fields.append("""        <field name="%s"><value>%s</value></field>""" % (key, value))
-    tpl = u"""<?xml version="1.0" encoding="UTF-8"?>
-<xfdf xmlns="http://ns.adobe.com/xfdf/" xml:space="preserve">
-    <fields>
-%s
-    </fields>
-</xfdf>""" % "\n".join(fields)
+    xfdf = etree.Element("xfdf", xmlns="http://ns.adobe.com/xfdf/")
+    xfdf.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
+
+    fields = etree.SubElement(xfdf, "fields")
+
+    for k, v in datas.items():
+        field = etree.SubElement(fields, "field", name=k)
+        value = etree.SubElement(field, "value")
+        value.text = v
+
+    tree = etree.ElementTree(xfdf)
+
     handle, out_file = tempfile.mkstemp()
-    f = open(out_file, 'w')
-    f.write(tpl)
+    f = open(out_file, 'wb')
+    tree.write(f, encoding='utf-8', xml_declaration=True)
     f.close()
     return out_file
 
