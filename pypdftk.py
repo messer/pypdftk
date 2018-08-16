@@ -13,7 +13,7 @@ import shutil
 import subprocess
 import tempfile
 import itertools
-import lxml
+from lxml import etree
 
 log = logging.getLogger(__name__)
 
